@@ -55,7 +55,7 @@ function AppSidebar() {
             <div className="p-3">
               <h2 className="font-bold text-lg">Chat</h2>
               {!user && <p className="text-xs text-gray-400">
-                Sign in to start chating with multiple AI model
+                Sign in to start chatting with multiple AI model
               </p>}
             </div>
           </SidebarGroup>
