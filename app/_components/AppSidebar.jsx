@@ -7,13 +7,16 @@ import {
   SidebarGroup,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import { Moon, Plus, Sun } from "lucide-react";
+import { SignInButton, useUser } from "@clerk/nextjs";
+import { Moon, Sun, User2, Zap } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import React, { useEffect } from "react";
+import UsageCreditProgress from "./UsageCreditProgress";
 
 function AppSidebar() {
   const { theme, setTheme } = useTheme();
+  const { user } = useUser();
 
   return (
     <div>
@@ -43,24 +46,37 @@ function AppSidebar() {
                 )}
               </div>
             </div>
-            <Button className="w-full mt-7">+New Chat</Button>
+            {user ? <Button className="w-full mt-7">+New Chat</Button> : 
+               <SignInButton><Button className="w-full mt-7">+New Chat</Button></SignInButton>}
           </div>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
             <div className="p-3">
               <h2 className="font-bold text-lg">Chat</h2>
-              <p className="text-xs text-gray-400">
+              {!user && <p className="text-xs text-gray-400">
                 Sign in to start chating with multiple AI model
-              </p>
+              </p>}
             </div>
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
           <div className="p-3 mb-9">
-            <Button className="w-full" size="lg">
-              Sign In/Sign Up
-            </Button>
+            {!user ? (
+              <SignInButton mode="modal">
+                <Button className="w-full" size="lg">
+                  Sign In/Sign Up
+                </Button>
+              </SignInButton>
+            ) : (
+              <div>
+                <UsageCreditProgress />
+                <Button className='mb-3 w-full'><Zap /> Upgrade Plan</Button>
+                <Button className="flex w-full" variant="ghost">
+                <User2 /> <h2>Settings</h2>
+              </Button>
+              </div>
+            )}
           </div>
         </SidebarFooter>
       </Sidebar>
