@@ -20,9 +20,9 @@ export default [
       premium: false,
       enable: true,
       subModel: [
-        { name: 'Gemini 2.5 Lite', premium: false, id: 'gemini-2.5-lite' },
+        { name: 'Gemini 2.5 Lite', premium: false, id: 'gemini-2.5-flash-lite' },
         { name: 'Gemini 2.5 Flash', premium: false, id: 'gemini-2.5-flash' },
-        { name: 'Gemini 2.5 Pro', premium: true, id: 'gemini-2.5-pro' }
+        { name: 'Gemini 2.5 Pro', premium: true, id: 'Gemini 2.5 Pro' }
       ]
     },
     {
@@ -31,8 +31,8 @@ export default [
       premium: false,
       enable: true,
       subModel: [
-        { name: 'DeepSeek R1', premium: false, id: 'deepseek-r1' },
-        { name: 'DeepSeek R1 0528', premium: true, id: 'deepseek-r1-0528' }
+        { name: 'DeepSeek R1', premium: false, id: 'DeepSeek-R1' },
+        { name: 'DeepSeek R1 0528', premium: true, id: 'DeepSeek-R1-0528' }
       ]
     },
     {
@@ -42,7 +42,7 @@ export default [
       enable: true,
       subModel: [
         { name: 'Mistral Medium 2505', premium: true, id: 'mistral-medium-2505' },
-        { name: 'Mistral 3B', premium: false, id: 'mistral-3b' }
+        { name: 'Mistral 3B', premium: false, id: 'Ministral-3B' }
       ]
     },
     {
@@ -71,8 +71,8 @@ export default [
       premium: true,
       enable: true,
       subModel: [
-        { name: 'Llama 3.3 70B Instruct', premium: true, id: 'llama-3.3-70b-instruct' },
-        { name: 'Llama 4 Scout 17B 16E Instruct', premium: false, id: 'llama-4-scout-17b-16e' }
+        { name: 'Llama 3.3 70B Instruct', premium: true, id: 'Llama-3.3-70B-Instruct' },
+        { name: 'Llama 4 Scout 17B 16E Instruct', premium: false, id: 'Llama-4-Scout-17B-16E-Instruct' }
       ]
     }
   ]
