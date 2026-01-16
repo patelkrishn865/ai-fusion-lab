@@ -8,7 +8,7 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/config/FirebaseConfig";
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
@@ -17,6 +17,7 @@ function ChatInputBox() {
   const { aiSelectedModels, setAiSelectedModels, messages, setMessages } =
     useContext(AiSelectedModelContext);
     const { user } = useUser();
+    const { has } = useAuth();
 
   const [chatId, setChatId] = useState();
   const params = useSearchParams();
@@ -35,14 +36,16 @@ function ChatInputBox() {
   const handleSend = async () => {
     if (!userInput.trim()) return;
 
-    const result = await axios.post('/api/user-remaining-msg', {
-      token: 1
-    });
-
-    const remainingToken = result?.data?.remainingToken;
-    if(remainingToken <= 0) {
-      toast.error("Maximum Daily Limit Exceed");
-      return;
+    if(!has({ plan: 'unlimited_plan' })) {
+      const result = await axios.post('/api/user-remaining-msg', {
+        token: 1
+      });
+  
+      const remainingToken = result?.data?.remainingToken;
+      if(remainingToken <= 0) {
+        toast.error("Maximum Daily Limit Exceed");
+        return;
+      }
     }
 
     // 1️⃣ Add user message to all enabled models

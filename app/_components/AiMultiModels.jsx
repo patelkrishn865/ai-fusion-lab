@@ -15,17 +15,21 @@ import { Switch } from "@/components/ui/switch";
 import { Loader, Lock, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AiSelectedModelContext } from "@/context/AiSelectedModelContext";
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/config/FirebaseConfig";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { DefaultModel } from "@/shared/AiModelsShared";
 
 function AiMultiModels() {
   const { user } = useUser();
   const [aiModelList, setAiModelList] = useState(AiModelList);
   const { aiSelectedModels, setAiSelectedModels, messages, setMessages } =
     useContext(AiSelectedModelContext);
+  const { has } = useAuth();
+  const canUseUnlimited = typeof has === "function" && has({ plan: "unlimited_plan" });
+
 
 useEffect(() => {
   setAiModelList((prev) =>
@@ -102,10 +106,10 @@ useEffect(() => {
                 width={24}
                 height={24}
               />
-              {model.enable && (
+              {canUseUnlimited && model.enable && (
                 <Select
                   defaultValue={aiSelectedModels[model.model]?.modelId}
-                  disabled={model.premium}
+                  disabled={model.premium && !canUseUnlimited}
                   onValueChange={(value) => onSelectValue(model.model, value)}
                 >
                   <SelectTrigger className="w-45">
@@ -133,7 +137,7 @@ useEffect(() => {
                             <SelectItem
                               key={index}
                               value={subModel.id}
-                              disabled={subModel.premium}
+                              disabled={model.premium && !canUseUnlimited}
                             >
                               {subModel.name}{" "}
                               {subModel.premium && <Lock className="h-4 w-4" />}
@@ -158,7 +162,7 @@ useEffect(() => {
               )}
             </div>
           </div>
-          {model.premium && model.enable && (
+          {!canUseUnlimited && model.premium && model.enable && (
             <div className="flex items-center justify-center h-full">
               <Button>
                 {" "}
@@ -167,7 +171,7 @@ useEffect(() => {
               </Button>
             </div>
           )}
-          {model.enable && (
+          {model.enable && aiSelectedModels[model.model]?.enable && (!model.premium || canUseUnlimited) && (
             <div className="flex-1 p-4">
               <div className="flex-1 space-y-2 p-4">
                 {messages[model.model]?.map((m, i) => (
