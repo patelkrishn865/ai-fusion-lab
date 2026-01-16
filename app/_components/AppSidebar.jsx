@@ -7,7 +7,7 @@ import {
   SidebarGroup,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import { SignInButton, useUser } from "@clerk/nextjs";
+import { SignInButton, useAuth, useUser } from "@clerk/nextjs";
 import { Moon, Sun, User2, Zap } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
@@ -19,6 +19,7 @@ import moment from "moment";
 import Link from "next/link";
 import axios from "axios";
 import { AiSelectedModelContext } from "@/context/AiSelectedModelContext";
+import PricingModel from "./PricingModel";
 
 function AppSidebar() {
   const { theme, setTheme } = useTheme();
@@ -27,6 +28,7 @@ function AppSidebar() {
   const [freeMsgCount, setFreeMsgCount] = useState(0);
   const { aiSelectedModels, setAiSelectedModels, messages, setMessages } =
     useContext(AiSelectedModelContext);
+  const { has } = useAuth();
 
   useEffect(() => {
     user && GetChatHistory();
@@ -34,7 +36,7 @@ function AppSidebar() {
 
   useEffect(() => {
     GetRemainingTokenMsgs();
-  }, [messages])
+  }, [messages]);
 
   const GetChatHistory = async () => {
     const q = query(
@@ -53,7 +55,7 @@ function AppSidebar() {
     const allMessages = Object.values(chat.messages).flat();
     const userMessages = allMessages.filter((msg) => msg.role === "user");
 
-    const lastUserMsg = userMessages[userMessages.length - 1].content || null;
+    const lastUserMsg = userMessages[userMessages?.length - 1]?.content || null;
 
     const lastUpdated = chat.lastUpdated || Date.now();
     const formattedDate = moment(lastUpdated).fromNow();
@@ -65,9 +67,9 @@ function AppSidebar() {
   };
 
   const GetRemainingTokenMsgs = async () => {
-    const result = await axios.post('/api/user-remaining-msg', { token: 0 })
+    const result = await axios.post("/api/user-remaining-msg", { token: 0 });
     setFreeMsgCount(result?.data?.remainingToken ?? 0);
-  }
+  };
 
   return (
     <div>
@@ -98,7 +100,9 @@ function AppSidebar() {
               </div>
             </div>
             {user ? (
-              <Link href='/'><Button className="w-full mt-7">+New Chat</Button></Link>
+              <Link href="/">
+                <Button className="w-full mt-7">+New Chat</Button>
+              </Link>
             ) : (
               <SignInButton>
                 <Button className="w-full mt-7">+New Chat</Button>
@@ -117,7 +121,11 @@ function AppSidebar() {
               )}
 
               {chatHistory.map((chat, index) => (
-                <Link href={'?chatId='+chat.chatId} key={index} className="mt-2">
+                <Link
+                  href={"?chatId=" + chat.chatId}
+                  key={index}
+                  className="mt-2"
+                >
                   <div className="hover:bg-gray-100 dark:hover:bg-gray-950 p-3 cursor-pointer">
                     <h2 className="text-sm text-gray-400">
                       {GetLastUserMessageFromChat(chat).lastMsgDate}
@@ -142,10 +150,13 @@ function AppSidebar() {
               </SignInButton>
             ) : (
               <div>
-                <UsageCreditProgress remainingToken={freeMsgCount} />
-                <Button className="mb-3 w-full">
-                  <Zap /> Upgrade Plan
-                </Button>
+                {!has({ plan: 'unlimited_plan' }) && <div> <UsageCreditProgress remainingToken={freeMsgCount} />
+                <PricingModel>
+                  <Button className="mb-3 w-full">
+                    <Zap /> Upgrade Plan
+                  </Button>
+                </PricingModel>
+                </div> }
                 <Button className="flex w-full" variant="ghost">
                   <User2 /> <h2>Settings</h2>
                 </Button>
