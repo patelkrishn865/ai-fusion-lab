@@ -191,9 +191,9 @@ useEffect(() => {
                           <span>Thinking...</span>
                         </>
                       )}
-                      {m.content !== "loading" && (
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {m.content}
+                      {m?.content !== "loading" && (
+                        m?.content && <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {m?.content}
                         </ReactMarkdown>
                       )}
                     </div>
