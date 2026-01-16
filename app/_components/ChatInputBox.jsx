@@ -5,11 +5,31 @@ import React, { useContext, useEffect, useState } from "react";
 import AiMultiModels from "./AiMultiModels";
 import { AiSelectedModelContext } from "@/context/AiSelectedModelContext";
 import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "@/config/FirebaseConfig";
+import { useUser } from "@clerk/nextjs";
+import { useSearchParams } from "next/navigation";
 
 function ChatInputBox() {
   const [userInput, setUserInput] = useState("");
   const { aiSelectedModels, setAiSelectedModels, messages, setMessages } =
     useContext(AiSelectedModelContext);
+    const { user } = useUser();
+
+  const [chatId, setChatId] = useState();
+  const params = useSearchParams();
+
+  useEffect(() => {
+    const chatId_ = params.get('chatId')
+    if(chatId_) {
+        setChatId(chatId_)
+        GetMessages(chatId_);
+    } else {
+      setMessages([]);
+    setChatId(uuidv4());
+    }
+  },[params])
 
   const handleSend = async () => {
     if (!userInput.trim()) return;
@@ -28,15 +48,13 @@ function ChatInputBox() {
       return updated;
     });
 
-    const currentInput = userInput; // capture before reset
+    const currentInput = userInput; 
     setUserInput("");
 
-    // 2️⃣ Fetch response from each enabled model
     Object.entries(aiSelectedModels).forEach(
       async ([parentModel, modelInfo]) => {
         if (!modelInfo.modelId || aiSelectedModels[parentModel].enable === false) return;
 
-        // Add loading placeholder before API call
         setMessages((prev) => ({
           ...prev,
           [parentModel]: [
@@ -97,7 +115,33 @@ function ChatInputBox() {
     );
   };
 
-  
+  useEffect(() => {
+    if(messages)
+    {
+        SaveMessages();
+    }
+  }, [messages]);
+
+  const SaveMessages = async () => {
+    if (!db) return;
+  if (!chatId) return;
+    const docRef = doc(db, 'chatHistory', chatId);
+
+    await setDoc(docRef,{
+        chatId:chatId,
+        userEmail: user?.primaryEmailAddress?.emailAddress,
+        messages:messages,
+        lastUpdated: Date.now()
+    })
+  }
+
+  const GetMessages = async(chatId) => {
+    const docRef = doc(db, 'chatHistory', chatId);
+    const docSnap = await getDoc(docRef);
+    console.log( docSnap.data());
+    const docData = docSnap.data();
+    setMessages(docData.messages)
+  }
 
   return (
     <div className="relative min-h-screen">
