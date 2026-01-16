@@ -18,7 +18,7 @@ function PricingModel({ children }) {
           <DialogHeader>
             <DialogTitle>Upgrade Plan</DialogTitle>
             <DialogDescription>
-              T<PricingTable />
+              <PricingTable />
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
