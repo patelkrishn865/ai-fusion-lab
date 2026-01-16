@@ -122,7 +122,7 @@ function AppSidebar() {
 
               {chatHistory.map((chat, index) => (
                 <Link
-                  href={"?chatId=" + chat.chatId}
+                  href={`/?chatId=${chat.chatId}`}
                   key={index}
                   className="mt-2"
                 >
@@ -157,9 +157,9 @@ function AppSidebar() {
                   </Button>
                 </PricingModel>
                 </div> }
-                <Button className="flex w-full" variant="ghost">
+                <Link href={'/settings'}><Button className="flex w-full" variant="ghost">
                   <User2 /> <h2>Settings</h2>
-                </Button>
+                </Button></Link>
               </div>
             )}
           </div>

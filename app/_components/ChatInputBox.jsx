@@ -136,18 +136,25 @@ function ChatInputBox() {
     }
   }, [messages]);
 
-  const SaveMessages = async () => {
+  const SaveMessages = async (msgs) => {
     if (!db) return;
-  if (!chatId) return;
-    const docRef = doc(db, 'chatHistory', chatId);
-
-    await setDoc(docRef,{
-        chatId:chatId,
-        userEmail: user?.primaryEmailAddress?.emailAddress,
-        messages:messages,
-        lastUpdated: Date.now()
-    })
-  }
+    if (!chatId) return;
+  
+    const userEmail = user?.primaryEmailAddress?.emailAddress;
+    if (!userEmail) return; 
+  
+    await setDoc(
+      doc(db, "chatHistory", chatId),
+      {
+        chatId,
+        userEmail,
+        messages: msgs ?? messages ?? {},
+        lastUpdated: Date.now(),
+      },
+      { merge: true }
+    );
+  };
+  
 
   const GetMessages = async(chatId) => {
     const docRef = doc(db, 'chatHistory', chatId);

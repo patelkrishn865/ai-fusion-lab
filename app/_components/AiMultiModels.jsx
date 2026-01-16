@@ -28,17 +28,17 @@ function AiMultiModels() {
   const { aiSelectedModels, setAiSelectedModels, messages, setMessages } =
     useContext(AiSelectedModelContext);
   const { has } = useAuth();
-  const canUseUnlimited = typeof has === "function" && has({ plan: "unlimited_plan" });
+  const canUseUnlimited =
+    typeof has === "function" && has({ plan: "unlimited_plan" });
 
-
-useEffect(() => {
-  setAiModelList((prev) =>
-    prev.map((m) => ({
-      ...m,
-      enable: aiSelectedModels[m.model]?.enable ?? m.enable,  
-    }))
-  );
-}, [aiSelectedModels]);  
+  useEffect(() => {
+    setAiModelList((prev) =>
+      prev.map((m) => ({
+        ...m,
+        enable: aiSelectedModels[m.model]?.enable ?? m.enable,
+      }))
+    );
+  }, [aiSelectedModels]);
   const onToggleChange = (model, value) => {
     setAiModelList((prev) =>
       prev.map((m) => (m.model === model ? { ...m, enable: value } : m))
@@ -106,10 +106,9 @@ useEffect(() => {
                 width={24}
                 height={24}
               />
-              {canUseUnlimited && model.enable && (
+              {model.enable && (
                 <Select
                   defaultValue={aiSelectedModels[model.model]?.modelId}
-                  disabled={model.premium && !canUseUnlimited}
                   onValueChange={(value) => onSelectValue(model.model, value)}
                 >
                   <SelectTrigger className="w-45">
@@ -129,22 +128,19 @@ useEffect(() => {
                           )
                       )}
                     </SelectGroup>
-                    <SelectGroup className="px-3">
-                      <SelectLabel>Premium</SelectLabel>
-                      {model.subModel.map(
-                        (subModel, index) =>
-                          subModel.premium === true && (
-                            <SelectItem
-                              key={index}
-                              value={subModel.id}
-                              disabled={model.premium && !canUseUnlimited}
-                            >
+                    {canUseUnlimited && (
+                      <SelectGroup className="px-3">
+                        <SelectLabel>Premium</SelectLabel>
+                        {model.subModel
+                          .filter((s) => s.premium)
+                          .map((subModel) => (
+                            <SelectItem key={subModel.id} value={subModel.id}>
                               {subModel.name}{" "}
-                              {subModel.premium && <Lock className="h-4 w-4" />}
+                              <Lock className="h-4 w-4 inline" />
                             </SelectItem>
-                          )
-                      )}
-                    </SelectGroup>
+                          ))}
+                      </SelectGroup>
+                    )}
                   </SelectContent>
                 </Select>
               )}
@@ -171,41 +167,43 @@ useEffect(() => {
               </Button>
             </div>
           )}
-          {model.enable && aiSelectedModels[model.model]?.enable && (!model.premium || canUseUnlimited) && (
-            <div className="flex-1 p-4">
-              <div className="flex-1 space-y-2 p-4">
-                {messages[model.model]?.map((m, i) => (
-                  <div
-                    className={`p-2 rounded-md ${
-                      m.role === "user"
-                        ? "bg-blue-100 text-blue-900"
-                        : "text-gray-900 bg-gray-100"
-                    }`}
-                    key={i}
-                  >
-                    {m.role === "assistant" && (
-                      <span className="text-sm text-gray-400">
-                        {m.model ?? model.model}
-                      </span>
-                    )}
-                    <div className="flex gap-3 items-center">
-                      {m.content === "loading" && (
-                        <>
-                          <Loader className="animate-spin" />
-                          <span>Thinking...</span>
-                        </>
+          {model.enable &&
+            aiSelectedModels[model.model]?.enable &&
+            (!model.premium || canUseUnlimited) && (
+              <div className="flex-1 p-4">
+                <div className="flex-1 space-y-2 p-4">
+                  {messages[model.model]?.map((m, i) => (
+                    <div
+                      className={`p-2 rounded-md ${
+                        m.role === "user"
+                          ? "bg-blue-100 text-blue-900"
+                          : "text-gray-900 bg-gray-100"
+                      }`}
+                      key={i}
+                    >
+                      {m.role === "assistant" && (
+                        <span className="text-sm text-gray-400">
+                          {m.model ?? model.model}
+                        </span>
                       )}
-                      {m?.content !== "loading" && (
-                        m?.content && <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {m?.content}
-                        </ReactMarkdown>
-                      )}
+                      <div className="flex gap-3 items-center">
+                        {m.content === "loading" && (
+                          <>
+                            <Loader className="animate-spin" />
+                            <span>Thinking...</span>
+                          </>
+                        )}
+                        {m?.content !== "loading" && m?.content && (
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {m?.content}
+                          </ReactMarkdown>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       ))}
     </div>
